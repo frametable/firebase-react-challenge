@@ -1,56 +1,17 @@
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
-import styled from "styled-components";
 import { auth } from "../firebase";
 import { Link, useNavigate } from "react-router-dom";
 import GithubButton from "../components/github-btn";
-
-const Wrapper = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 420px;
-  padding: 50px 0px;
-`;
-
-const Title = styled.h1`
-  font-size: 42px;
-`;
-
-const Form = styled.form`
-  margin-top: 50px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-`;
-
-const Input = styled.input`
-  padding: 10px 20px;
-  border-radius: 50px;
-  border: none;
-  width: 100%;
-  font-size: 16px;
-  &[type="submit"] {
-    cursor: pointer;
-    &:hover {
-      opacity: 0.7;
-    }
-  }
-`;
-
-const Error = styled.span`
-  font-weight: 600;
-  color: tomato;
-`;
-
-const Switcher = styled.span`
-  margin-top: 20px;
-  a {
-    color: #1d9bf0;
-  }
-`;
+import { FirebaseError } from "firebase/app";
+import {
+  Error,
+  Form,
+  Input,
+  Switcher,
+  Title,
+  Wrapper,
+} from "../components/auth-components";
 
 export default function CreateAccount() {
   const navigate = useNavigate();
@@ -73,11 +34,11 @@ export default function CreateAccount() {
   };
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
     if (isLoading || name === "" || email == "" || password == "") return;
     try {
       //create account
       setLoading(true);
-
       const creadentials = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -87,7 +48,10 @@ export default function CreateAccount() {
       await updateProfile(creadentials.user, { displayName: name });
       navigate("/");
     } catch (e) {
-      //set error
+      if (e instanceof FirebaseError) {
+        console.log(e.code, e.message);
+        setError(e.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -119,7 +83,10 @@ export default function CreateAccount() {
           placeholder="Password"
           type="password"
         />
-        <Input type="submit" value={isLoading ? "Loading" : "Create Account"} />
+        <Input
+          type="submit"
+          value={isLoading ? "Loading..." : "Create Account"}
+        />
       </Form>
       {error !== "" ? <Error>{error}</Error> : null}
       <Switcher>
