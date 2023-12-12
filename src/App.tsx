@@ -55,6 +55,7 @@ const GlobalStyles = createGlobalStyle`
 const Wrapper = styled.div`
   height: 100vh;
   display: flex;
+  //grid-template-columns: 1fr 1fr 1fr;
   justify-content: center;
 `;
 
